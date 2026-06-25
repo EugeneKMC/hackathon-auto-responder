@@ -1,0 +1,26 @@
+# Render Blueprint. Either deploy manually as a Web Service (Docker runtime,
+# auto-detected from the Dockerfile) or use this blueprint. Set the env vars
+# marked `sync: false` in the Render dashboard — they are secrets.
+services:
+  - type: web
+    name: hackathon-auto-responder
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: MS_GRAPH_TENANT_ID
+        sync: false
+      - key: MS_GRAPH_CLIENT_ID
+        sync: false
+      - key: MS_GRAPH_CLIENT_SECRET
+        sync: false
+      - key: MS_GRAPH_USER_EMAIL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ALLOWED_EMAIL
+        sync: false
