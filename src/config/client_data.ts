@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse } from 'csv-parse/sync';
+import { env } from '@/utils/env';
 
 // Ported from the 3am-client-assistant Express server (dataStore.js).
 // Loads the hackathon client dataset CSVs (Clients / Seats / Invoices /
@@ -107,7 +108,7 @@ const DEFAULT_DATA_DIR = path.resolve(import.meta.dir, '..', '..', 'data');
 let cache: ClientData | null = null;
 
 export function loadClientData(
-  dataDir: string = Bun.env.DATA_DIR || DEFAULT_DATA_DIR
+  dataDir: string = env.DATA_DIR || DEFAULT_DATA_DIR
 ): ClientData {
   if (cache) return cache;
   const resolved = path.resolve(dataDir);
