@@ -13,6 +13,7 @@ export type GraphMessage = {
   subject: string | null;
   bodyPreview: string;
   body?: GraphMessageBody;
+  uniqueBody?: GraphMessageBody;
   receivedDateTime: string;
   isRead: boolean;
   from: {

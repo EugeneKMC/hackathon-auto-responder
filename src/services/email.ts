@@ -13,17 +13,21 @@ import type {
 const MAILBOX = encodeURIComponent(env.MS_GRAPH_USER_EMAIL);
 
 const LIST_SELECT =
-  'id,subject,from,bodyPreview,body,receivedDateTime,isRead';
+  'id,subject,from,bodyPreview,body,uniqueBody,receivedDateTime,isRead';
 const DETAIL_SELECT =
   'id,subject,from,toRecipients,body,bodyPreview,receivedDateTime,isRead';
 
 export const emailService = {
   async listUnreadMessages(top = 25) {
     try {
+      const since = new Date(
+        Date.now() - env.POLL_LOOKBACK_HOURS * 60 * 60 * 1000
+      ).toISOString();
+      const filter = `isRead eq false and receivedDateTime ge ${since}`;
       const path =
         `/users/${MAILBOX}/messages` +
         `?$select=${LIST_SELECT}` +
-        `&$filter=${encodeURIComponent('isRead eq false')}` +
+        `&$filter=${encodeURIComponent(filter)}` +
         `&$orderby=${encodeURIComponent('receivedDateTime desc')}` +
         `&$top=${top}`;
       const data = await graphFetch<GraphMessageList>(path);
@@ -96,6 +100,32 @@ export const emailService = {
     } catch (err) {
       return ServiceResponse.internalServerError(
         'Failed to reply to message',
+        err instanceof Error ? err.message : err
+      );
+    }
+  },
+
+  // Sends an HTML reply that lives in the same conversation thread as the
+  // original message. Three-step Graph flow: createReply -> patch body -> send.
+  async sendHtmlReplyInThread(messageId: string, html: string) {
+    try {
+      const draft = await graphFetch<{ id: string }>(
+        `/users/${MAILBOX}/messages/${messageId}/createReply`,
+        { method: 'POST' }
+      );
+      await graphFetch(`/users/${MAILBOX}/messages/${draft.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          body: { contentType: 'HTML', content: html },
+        }),
+      });
+      await graphFetch(`/users/${MAILBOX}/messages/${draft.id}/send`, {
+        method: 'POST',
+      });
+      return ServiceResponse.success({ messageId, draftId: draft.id });
+    } catch (err) {
+      return ServiceResponse.internalServerError(
+        'Failed to send threaded reply',
         err instanceof Error ? err.message : err
       );
     }
