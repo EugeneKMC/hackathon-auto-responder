@@ -9,6 +9,7 @@ export const env = createEnv({
       .default('development'),
 
     DATABASE_URL: z.string().url().optional(),
+    DIRECT_DATABASE_URL: z.string().url().optional(),
 
     OPENAI_API_KEY: z.string().min(1).optional(),
     OPENAI_MODEL: z.string().default('gpt-4o-mini'),
