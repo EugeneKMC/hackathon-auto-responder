@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun run lint)",
+      "Bash(bun run lint:fix)",
+      "Bash(bun run test)",
+      "Bash(bun run db:generate)",
+      "Bash(bun run db:check)",
+      "Bash(bun run db:seed)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(gh issue view*)",
+      "Bash(gh pr view*)"
+    ],
+    "deny": [
+      "Bash(bun run db:drop)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Bash(rm -rf*)"
+    ]
+  }
+}
