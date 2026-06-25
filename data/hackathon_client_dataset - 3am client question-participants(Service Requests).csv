@@ -1,0 +1,42 @@
+SERVICE REQUESTS,,,,,,,,,,,
+Support tickets per client — 38 rows total across all types and statuses,,,,,,,,,,,
+,,,,,,,,,,,
+Ticket Id,Client Id,Company Name,Request Type,Description,Priority,Status,Submitted Date,Assigned To,Resolved Date,Days Open,Client Notes
+SR-0001,CLT-001,Nexus Logistics,Headcount Change,Request to add or remove contracted seats,Low,Resolved,2026-03-17,IT Support Team,2026-03-25,0,No further action required
+SR-0002,CLT-001,Nexus Logistics,Facilities,"Aircon, lighting, cleaning, or furniture request",Medium,Open,2026-05-02,HR & Compliance,,31,Client followed up via email
+SR-0003,CLT-001,Nexus Logistics,Headcount Change,Request to add or remove contracted seats,Low,Resolved,2026-02-28,HR & Compliance,2026-03-14,0,Awaiting client confirmation
+SR-0004,CLT-001,Nexus Logistics,IT Support,"Hardware, software, or connectivity issue",Medium,Resolved,2026-03-09,Account Management,2026-03-18,0,
+SR-0005,CLT-001,Nexus Logistics,Contract Query,Question about contract terms or renewal,Medium,In Progress,2026-04-08,Account Management,,55,Escalated to senior team
+SR-0006,CLT-001,Nexus Logistics,Other,General inquiry or miscellaneous request,High,Resolved,2026-03-10,IT Support Team,2026-03-18,0,Awaiting client confirmation
+SR-0007,CLT-001,Nexus Logistics,IT Support,"Hardware, software, or connectivity issue",Medium,Resolved,2026-05-24,HR & Compliance,2026-05-25,0,Awaiting client confirmation
+SR-0008,CLT-002,BrightPath BPO,Headcount Change,Request to add or remove contracted seats,Medium,Open,2026-03-03,IT Support Team,,91,Client followed up via email
+SR-0009,CLT-002,BrightPath BPO,Facilities,"Aircon, lighting, cleaning, or furniture request",Medium,Resolved,2026-05-23,Operations Team,2026-05-27,0,Awaiting client confirmation
+SR-0010,CLT-002,BrightPath BPO,Contract Query,Question about contract terms or renewal,High,Resolved,2026-05-16,Facilities Team,2026-05-26,0,Escalated to senior team
+SR-0011,CLT-003,Horizon Retail,IT Support,"Hardware, software, or connectivity issue",High,Open,2026-05-20,Account Management,,13,Escalated to senior team
+SR-0012,CLT-003,Horizon Retail,Access & Security,"Badge, visitor pass, or door access request",Low,Open,2026-04-03,IT Support Team,,60,Escalated to senior team
+SR-0013,CLT-003,Horizon Retail,Other,General inquiry or miscellaneous request,Medium,Open,2026-04-19,Facilities Team,,44,Awaiting client confirmation
+SR-0014,CLT-003,Horizon Retail,Contract Query,Question about contract terms or renewal,High,In Progress,2026-04-05,Facilities Team,,58,No further action required
+SR-0015,CLT-003,Horizon Retail,Access & Security,"Badge, visitor pass, or door access request",High,Open,2026-05-01,HR & Compliance,,32,Client followed up via email
+SR-0016,CLT-003,Horizon Retail,Headcount Change,Request to add or remove contracted seats,Low,Resolved,2026-03-10,IT Support Team,2026-03-24,0,Awaiting client confirmation
+SR-0017,CLT-004,AquaCore Systems,Access & Security,"Badge, visitor pass, or door access request",High,Resolved,2026-03-31,IT Support Team,2026-04-04,0,Awaiting client confirmation
+SR-0018,CLT-004,AquaCore Systems,Access & Security,"Badge, visitor pass, or door access request",High,Resolved,2026-06-01,Account Management,2026-06-06,0,Escalated to senior team
+SR-0019,CLT-004,AquaCore Systems,Other,General inquiry or miscellaneous request,High,Resolved,2026-02-28,Facilities Team,2026-03-11,0,Awaiting client confirmation
+SR-0020,CLT-004,AquaCore Systems,Facilities,"Aircon, lighting, cleaning, or furniture request",Low,Open,2026-05-05,Account Management,,28,Client followed up via email
+SR-0021,CLT-005,SkyBridge Finance,Contract Query,Question about contract terms or renewal,Medium,Resolved,2026-04-01,IT Support Team,2026-04-15,0,
+SR-0022,CLT-005,SkyBridge Finance,Headcount Change,Request to add or remove contracted seats,Low,In Progress,2026-02-13,HR & Compliance,,109,Client followed up via email
+SR-0023,CLT-005,SkyBridge Finance,Other,General inquiry or miscellaneous request,High,In Progress,2026-02-11,IT Support Team,,111,
+SR-0024,CLT-006,Pinnacle Pharma,Contract Query,Question about contract terms or renewal,Low,Open,2026-03-17,Operations Team,,77,
+SR-0025,CLT-006,Pinnacle Pharma,Contract Query,Question about contract terms or renewal,Medium,Resolved,2026-03-21,Facilities Team,2026-03-27,0,
+SR-0026,CLT-006,Pinnacle Pharma,Other,General inquiry or miscellaneous request,Medium,In Progress,2026-04-22,Operations Team,,41,Awaiting client confirmation
+SR-0027,CLT-006,Pinnacle Pharma,Other,General inquiry or miscellaneous request,Medium,Resolved,2026-03-11,IT Support Team,2026-03-19,0,Client followed up via email
+SR-0028,CLT-007,Coastal Shipping,Contract Query,Question about contract terms or renewal,Low,Open,2026-03-21,HR & Compliance,,73,Awaiting client confirmation
+SR-0029,CLT-007,Coastal Shipping,Contract Query,Question about contract terms or renewal,Medium,In Progress,2026-04-29,IT Support Team,,34,Awaiting client confirmation
+SR-0030,CLT-007,Coastal Shipping,Facilities,"Aircon, lighting, cleaning, or furniture request",High,In Progress,2026-04-26,HR & Compliance,,37,
+SR-0031,CLT-007,Coastal Shipping,Facilities,"Aircon, lighting, cleaning, or furniture request",Medium,Resolved,2026-03-15,IT Support Team,2026-03-16,0,Awaiting client confirmation
+SR-0032,CLT-007,Coastal Shipping,Facilities,"Aircon, lighting, cleaning, or furniture request",Medium,Open,2026-05-18,Account Management,,15,No further action required
+SR-0033,CLT-007,Coastal Shipping,Contract Query,Question about contract terms or renewal,Medium,Resolved,2026-05-06,HR & Compliance,2026-05-10,0,Escalated to senior team
+SR-0034,CLT-008,UrbanEdge Property,Headcount Change,Request to add or remove contracted seats,Medium,Resolved,2026-05-21,IT Support Team,2026-06-04,0,Client followed up via email
+SR-0035,CLT-008,UrbanEdge Property,Facilities,"Aircon, lighting, cleaning, or furniture request",Medium,In Progress,2026-02-23,Facilities Team,,99,
+SR-0036,CLT-008,UrbanEdge Property,Access & Security,"Badge, visitor pass, or door access request",Low,Resolved,2026-03-23,IT Support Team,2026-04-01,0,Client followed up via email
+SR-0037,CLT-008,UrbanEdge Property,Other,General inquiry or miscellaneous request,Low,In Progress,2026-02-06,Account Management,,116,
+SR-0038,CLT-008,UrbanEdge Property,Contract Query,Question about contract terms or renewal,Low,Resolved,2026-05-14,Account Management,2026-05-17,0,No further action required
