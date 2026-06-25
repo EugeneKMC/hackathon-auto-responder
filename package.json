@@ -11,6 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
     "db:drop": "drizzle-kit drop",
+    "db:seed": "bun run src/scripts/seed.ts",
+    "db:seed:accounts": "bun run src/scripts/seed_accounts.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "bun test"
