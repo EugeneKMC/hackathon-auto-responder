@@ -1,0 +1,44 @@
+INVOICES,,,,,,,,,,,
+5 months of billing history per client — 40 rows total,,,,,,,,,,,
+,,,,,,,,,,,
+Invoice Id,Client Id,Company Name,Invoice Number,Issue Date,Due Date,Amount Php,Status,Paid Date,Days Overdue,Billing Period,Description
+INV-0001,CLT-001,Nexus Logistics,WS-2026-0001,2026-02-01,2026-03-03,"80,748",Paid,2026-02-21,0,February 2026,Workspace & outsourcing services – February 2026
+INV-0002,CLT-001,Nexus Logistics,WS-2026-0002,2026-03-03,2026-04-02,"74,339",Paid,2026-03-23,0,March 2026,Workspace & outsourcing services – March 2026
+INV-0003,CLT-001,Nexus Logistics,WS-2026-0003,2026-04-02,2026-05-02,"77,607",Paid,2026-04-23,0,April 2026,Workspace & outsourcing services – April 2026
+INV-0004,CLT-001,Nexus Logistics,WS-2026-0004,2026-05-02,2026-06-01,"87,147",Paid,2026-05-30,0,May 2026,Workspace & outsourcing services – May 2026
+INV-0005,CLT-001,Nexus Logistics,WS-2026-0005,2026-06-01,2026-07-01,"80,845",Overdue,,0,June 2026,Workspace & outsourcing services – June 2026
+INV-0006,CLT-002,BrightPath BPO,WS-2026-0006,2026-02-01,2026-03-03,"365,250",Paid,2026-02-21,0,February 2026,Workspace & outsourcing services – February 2026
+INV-0007,CLT-002,BrightPath BPO,WS-2026-0007,2026-03-03,2026-04-02,"357,626",Paid,2026-03-30,0,March 2026,Workspace & outsourcing services – March 2026
+INV-0008,CLT-002,BrightPath BPO,WS-2026-0008,2026-04-02,2026-05-02,"354,505",Paid,2026-05-02,0,April 2026,Workspace & outsourcing services – April 2026
+INV-0009,CLT-002,BrightPath BPO,WS-2026-0009,2026-05-02,2026-06-01,"360,145",Paid,2026-05-27,0,May 2026,Workspace & outsourcing services – May 2026
+INV-0010,CLT-002,BrightPath BPO,WS-2026-0010,2026-06-01,2026-07-01,"349,168",Overdue,,0,June 2026,Workspace & outsourcing services – June 2026
+INV-0011,CLT-003,Horizon Retail,WS-2026-0011,2026-02-01,2026-03-03,"211,585",Paid,2026-02-28,0,February 2026,Workspace & outsourcing services – February 2026
+INV-0012,CLT-003,Horizon Retail,WS-2026-0012,2026-03-03,2026-04-02,"199,967",Paid,2026-03-28,0,March 2026,Workspace & outsourcing services – March 2026
+INV-0013,CLT-003,Horizon Retail,WS-2026-0013,2026-04-02,2026-05-02,"209,358",Paid,2026-04-22,0,April 2026,Workspace & outsourcing services – April 2026
+INV-0014,CLT-003,Horizon Retail,WS-2026-0014,2026-05-02,2026-06-01,"208,035",Unpaid,,0,May 2026,Workspace & outsourcing services – May 2026
+INV-0015,CLT-003,Horizon Retail,WS-2026-0015,2026-06-01,2026-07-01,"201,679",Unpaid,,0,June 2026,Workspace & outsourcing services – June 2026
+INV-0016,CLT-004,AquaCore Systems,WS-2026-0016,2026-02-01,2026-03-03,"118,581",Paid,2026-03-01,0,February 2026,Workspace & outsourcing services – February 2026
+INV-0017,CLT-004,AquaCore Systems,WS-2026-0017,2026-03-03,2026-04-02,"128,161",Paid,2026-03-25,0,March 2026,Workspace & outsourcing services – March 2026
+INV-0018,CLT-004,AquaCore Systems,WS-2026-0018,2026-04-02,2026-05-02,"129,655",Paid,2026-04-28,0,April 2026,Workspace & outsourcing services – April 2026
+INV-0019,CLT-004,AquaCore Systems,WS-2026-0019,2026-05-02,2026-06-01,"129,621",Unpaid,,0,May 2026,Workspace & outsourcing services – May 2026
+INV-0020,CLT-004,AquaCore Systems,WS-2026-0020,2026-06-01,2026-07-01,"122,361",Overdue,,0,June 2026,Workspace & outsourcing services – June 2026
+INV-0021,CLT-005,SkyBridge Finance,WS-2026-0021,2026-02-01,2026-03-03,"230,532",Paid,2026-02-28,0,February 2026,Workspace & outsourcing services – February 2026
+INV-0022,CLT-005,SkyBridge Finance,WS-2026-0022,2026-03-03,2026-04-02,"242,171",Paid,2026-03-25,0,March 2026,Workspace & outsourcing services – March 2026
+INV-0023,CLT-005,SkyBridge Finance,WS-2026-0023,2026-04-02,2026-05-02,"227,543",Paid,2026-05-01,0,April 2026,Workspace & outsourcing services – April 2026
+INV-0024,CLT-005,SkyBridge Finance,WS-2026-0024,2026-05-02,2026-06-01,"231,242",Paid,2026-05-30,0,May 2026,Workspace & outsourcing services – May 2026
+INV-0025,CLT-005,SkyBridge Finance,WS-2026-0025,2026-06-01,2026-07-01,"245,543",Paid,2026-06-25,0,June 2026,Workspace & outsourcing services – June 2026
+INV-0026,CLT-006,Pinnacle Pharma,WS-2026-0026,2026-02-01,2026-03-03,"95,608",Paid,2026-03-02,0,February 2026,Workspace & outsourcing services – February 2026
+INV-0027,CLT-006,Pinnacle Pharma,WS-2026-0027,2026-03-03,2026-04-02,"102,526",Paid,2026-03-27,0,March 2026,Workspace & outsourcing services – March 2026
+INV-0028,CLT-006,Pinnacle Pharma,WS-2026-0028,2026-04-02,2026-05-02,"100,338",Paid,2026-04-25,0,April 2026,Workspace & outsourcing services – April 2026
+INV-0029,CLT-006,Pinnacle Pharma,WS-2026-0029,2026-05-02,2026-06-01,"101,128",Unpaid,,0,May 2026,Workspace & outsourcing services – May 2026
+INV-0030,CLT-006,Pinnacle Pharma,WS-2026-0030,2026-06-01,2026-07-01,"86,753",Unpaid,,0,June 2026,Workspace & outsourcing services – June 2026
+INV-0031,CLT-007,Coastal Shipping,WS-2026-0031,2026-02-01,2026-03-03,"100,595",Paid,2026-02-21,0,February 2026,Workspace & outsourcing services – February 2026
+INV-0032,CLT-007,Coastal Shipping,WS-2026-0032,2026-03-03,2026-04-02,"94,146",Paid,2026-03-29,0,March 2026,Workspace & outsourcing services – March 2026
+INV-0033,CLT-007,Coastal Shipping,WS-2026-0033,2026-04-02,2026-05-02,"92,617",Paid,2026-05-01,0,April 2026,Workspace & outsourcing services – April 2026
+INV-0034,CLT-007,Coastal Shipping,WS-2026-0034,2026-05-02,2026-06-01,"88,182",Unpaid,,0,May 2026,Workspace & outsourcing services – May 2026
+INV-0035,CLT-007,Coastal Shipping,WS-2026-0035,2026-06-01,2026-07-01,"83,106",Overdue,,0,June 2026,Workspace & outsourcing services – June 2026
+INV-0036,CLT-008,UrbanEdge Property,WS-2026-0036,2026-02-01,2026-03-03,"258,903",Paid,2026-02-27,0,February 2026,Workspace & outsourcing services – February 2026
+INV-0037,CLT-008,UrbanEdge Property,WS-2026-0037,2026-03-03,2026-04-02,"259,135",Paid,2026-03-31,0,March 2026,Workspace & outsourcing services – March 2026
+INV-0038,CLT-008,UrbanEdge Property,WS-2026-0038,2026-04-02,2026-05-02,"252,279",Paid,2026-05-01,0,April 2026,Workspace & outsourcing services – April 2026
+INV-0039,CLT-008,UrbanEdge Property,WS-2026-0039,2026-05-02,2026-06-01,"254,752",Paid,2026-05-30,0,May 2026,Workspace & outsourcing services – May 2026
+INV-0040,CLT-008,UrbanEdge Property,WS-2026-0040,2026-06-01,2026-07-01,"260,174",Unpaid,,0,June 2026,Workspace & outsourcing services – June 2026
