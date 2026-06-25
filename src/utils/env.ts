@@ -20,6 +20,8 @@ export const env = createEnv({
     MS_GRAPH_USER_EMAIL: z.string().email(),
 
     EMAIL_POLL_INTERVAL_MS: z.coerce.number().default(30000),
+
+    DATA_DIR: z.string().optional(),
   },
   runtimeEnv: Bun.env,
   emptyStringAsUndefined: true,

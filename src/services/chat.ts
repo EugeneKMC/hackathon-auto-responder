@@ -38,7 +38,11 @@ export const chatService = {
           ...result,
           mode: 'agent',
         });
-      } catch {
+      } catch (err) {
+        console.warn(
+          'chat agent failed, using fallback:',
+          err instanceof Error ? err.message : err
+        );
         // fall through to deterministic fallback below
       }
 
