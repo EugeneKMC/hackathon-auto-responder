@@ -6,13 +6,11 @@ import type {
 
 import { getOpenAI } from '@/config/openai';
 import { env } from '@/utils/env';
-import {
-  CLIENTS,
-  findClient,
-  getInvoicesForClient,
-  getSeatAllocationForClient,
-  getServiceRequestsForClient,
-} from '@/services/mock_data';
+import { findClient } from '@/repositories/client';
+import { getInvoicesForClient } from '@/repositories/invoice';
+import { getSeatAllocationForClient } from '@/repositories/seat';
+import { getServiceRequestsForClient } from '@/repositories/service_request';
+import { CLIENTS } from '@/services/mock_data';
 import {
   EmailIntentResultSchema,
   type EmailIntentResult,
@@ -144,9 +142,9 @@ function str(v: unknown): string | null {
   return s === '' ? null : s;
 }
 
-function executeTool(name: string, args: ToolArgs): string {
+async function executeTool(name: string, args: ToolArgs): Promise<string> {
   if (name === 'find_client') {
-    const client = findClient({
+    const client = await findClient({
       company: str(args.company),
       primary_contact: str(args.primary_contact),
       email: str(args.email),
@@ -154,7 +152,7 @@ function executeTool(name: string, args: ToolArgs): string {
     return JSON.stringify({ client });
   }
   if (name === 'get_invoices') {
-    const invoices = getInvoicesForClient({
+    const invoices = await getInvoicesForClient({
       client_id: str(args.client_id),
       status: str(args.status),
       billing_period: str(args.billing_period),
@@ -164,13 +162,13 @@ function executeTool(name: string, args: ToolArgs): string {
     return JSON.stringify({ invoices, count: invoices.length });
   }
   if (name === 'get_seat_allocation') {
-    const seat = getSeatAllocationForClient({
+    const seat = await getSeatAllocationForClient({
       client_id: str(args.client_id),
     });
     return JSON.stringify({ seat });
   }
   if (name === 'get_service_requests') {
-    const tickets = getServiceRequestsForClient({
+    const tickets = await getServiceRequestsForClient({
       client_id: str(args.client_id),
       status: str(args.status),
       request_type: str(args.request_type),
@@ -297,7 +295,7 @@ ${email.body}`;
       messages.push(msg);
       for (const tc of msg.tool_calls) {
         const args = JSON.parse(tc.function.arguments) as ToolArgs;
-        const result = executeTool(tc.function.name, args);
+        const result = await executeTool(tc.function.name, args);
         messages.push({
           role: 'tool',
           tool_call_id: tc.id,

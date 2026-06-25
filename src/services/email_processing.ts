@@ -1,11 +1,9 @@
 import { runEmailIntentAgent } from '@/agents/email_intent_agent';
 import { emailService } from '@/services/email';
-import {
-  CLIENTS,
-  getInvoicesForClient,
-  getSeatAllocationForClient,
-  getServiceRequestsForClient,
-} from '@/services/mock_data';
+import { getInvoicesForClient } from '@/repositories/invoice';
+import { getSeatAllocationForClient } from '@/repositories/seat';
+import { getServiceRequestsForClient } from '@/repositories/service_request';
+import { CLIENTS } from '@/services/mock_data';
 import { renderEmailHtml } from '@/services/email_template';
 import { env } from '@/utils/env';
 import { ServiceResponse } from '@/utils/service_response';
@@ -63,35 +61,86 @@ type AgentIntent = {
   include: { invoices: boolean; seats: boolean; tickets: boolean };
 };
 
-function buildRenderInput(intro: string, intent: AgentIntent) {
+async function buildRenderInput(intro: string, intent: AgentIntent) {
   const clientId = normalizeNullable(intent.client_id);
   if (!clientId) return { intro };
 
   const client = CLIENTS.find((c) => c.client_id === clientId) ?? null;
+  const companyName = client?.company_name ?? '';
 
   const wantInvoices = intent.include?.invoices === true;
   const wantSeat = intent.include?.seats === true;
   const wantTickets = intent.include?.tickets === true;
 
-  let invoices = wantInvoices
-    ? getInvoicesForClient({
-        client_id: clientId,
-        date_from: intent.date_range?.from ?? null,
-        date_to: intent.date_range?.to ?? null,
-      })
-    : undefined;
+  const [invoicesRaw, seatRaw, ticketsRaw] = await Promise.all([
+    wantInvoices
+      ? getInvoicesForClient({
+          client_id: clientId,
+          date_from: intent.date_range?.from ?? null,
+          date_to: intent.date_range?.to ?? null,
+        })
+      : Promise.resolve(undefined),
+    wantSeat
+      ? getSeatAllocationForClient({ client_id: clientId })
+      : Promise.resolve(undefined),
+    wantTickets
+      ? getServiceRequestsForClient({
+          client_id: clientId,
+          status: 'active',
+        })
+      : Promise.resolve(undefined),
+  ]);
 
+  let invoices = invoicesRaw?.map((i) => ({
+    invoice_id: i.invoiceId,
+    client_id: i.clientId,
+    company_name: companyName,
+    invoice_number: i.invoiceNumber,
+    issue_date: i.issueDate,
+    due_date: i.dueDate,
+    amount_php: Number(i.amountPhp),
+    status: i.status,
+    paid_date: i.paidDate,
+    days_overdue: i.daysOverdue,
+    billing_period: i.billingPeriod,
+    description: i.description,
+  }));
   if (invoices && intent.latest_only) {
     invoices = invoices.slice(0, 1);
   }
 
-  const seat = wantSeat
-    ? getSeatAllocationForClient({ client_id: clientId })
+  const seat = seatRaw
+    ? {
+        seat_record_id: seatRaw.seatRecordId,
+        client_id: seatRaw.clientId,
+        company_name: companyName,
+        total_seats: seatRaw.totalSeats,
+        seats_occupied: seatRaw.seatsOccupied,
+        seats_available: seatRaw.seatsAvailable,
+        occupancy_pct: `${seatRaw.occupancyPct}%`,
+        floor_zone: seatRaw.floorZone,
+        daily_rate_php: Number(seatRaw.dailyRatePhp),
+        contract_start: seatRaw.contractStart,
+        contract_end: seatRaw.contractEnd,
+        next_review_date: seatRaw.nextReviewDate,
+        notes: seatRaw.notes,
+      }
     : undefined;
 
-  const tickets = wantTickets
-    ? getServiceRequestsForClient({ client_id: clientId, status: 'active' })
-    : undefined;
+  const tickets = ticketsRaw?.map((t) => ({
+    ticket_id: t.ticketId,
+    client_id: t.clientId,
+    company_name: companyName,
+    request_type: t.requestType,
+    description: t.description,
+    priority: t.priority,
+    status: t.status,
+    submitted_date: t.submittedDate,
+    assigned_to: t.assignedTo,
+    resolved_date: t.resolvedDate,
+    days_open: t.daysOpen,
+    client_notes: t.clientNotes,
+  }));
 
   return { intro, client, invoices, seat, tickets };
 }
@@ -138,8 +187,7 @@ export const emailProcessingService = {
     // Loop guard: only skip when WE are the sender (our own polling mailbox).
     // User replies to our auto-responder are NOT loops — they're follow-ups.
     if (
-      email.from.address.toLowerCase() ===
-      env.MS_GRAPH_USER_EMAIL.toLowerCase()
+      email.from.address.toLowerCase() === env.MS_GRAPH_USER_EMAIL.toLowerCase()
     ) {
       return ServiceResponse.success({
         skipped: true,
@@ -150,7 +198,8 @@ export const emailProcessingService = {
     if (isLowSignalBody(email.body)) {
       return ServiceResponse.success({
         skipped: true,
-        reason: 'body has no meaningful plain text (likely HTML-only / marketing)',
+        reason:
+          'body has no meaningful plain text (likely HTML-only / marketing)',
       });
     }
 
@@ -172,7 +221,7 @@ export const emailProcessingService = {
     }
 
     const replyTo = email.from.address;
-    const html = renderEmailHtml(buildRenderInput(reply, result.intent));
+    const html = renderEmailHtml(await buildRenderInput(reply, result.intent));
 
     // If we have a real Graph message ID, reply in-thread so it appears as
     // part of the same conversation in Outlook. Otherwise fall back to a
