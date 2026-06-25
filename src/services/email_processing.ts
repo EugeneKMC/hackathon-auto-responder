@@ -1,6 +1,10 @@
 import { runEmailIntentAgent } from '@/agents/email_intent_agent';
 import { emailService } from '@/services/email';
 import { ServiceResponse } from '@/utils/service_response';
+import {
+  isAutomatedSender,
+  isForwardableIntent,
+} from '@/constants/email_filter';
 import type { ProcessEmailPayload } from '@/schemas/email_processing';
 
 const FORWARD_TO = 'eugene.capalad@kmc.solutions';
@@ -38,12 +42,31 @@ export const emailProcessingService = {
   },
 
   async processAndForward(email: ProcessEmailPayload) {
+    // Cheap pre-filter: skip automated/no-reply senders before spending an
+    // OpenAI call. Catches notification mail (Azure, ERP, PandaDoc, etc.).
+    if (isAutomatedSender(email.from.address)) {
+      return ServiceResponse.success({
+        forwarded: false as const,
+        reason: 'automated_sender' as const,
+        intent: null,
+      });
+    }
+
     const { result, error } = await this.processEmail(email);
     if (error || !result) {
       return ServiceResponse.internalServerError(
         error?.message ?? 'Processing returned no result',
         error?.details
       );
+    }
+
+    // Intent post-filter: don't forward mail the agent couldn't classify.
+    if (!isForwardableIntent(result.intent.intent)) {
+      return ServiceResponse.success({
+        forwarded: false as const,
+        reason: 'non_forwardable_intent' as const,
+        intent: result.intent.intent,
+      });
     }
 
     const intentJson = JSON.stringify(result.intent, null, 2);
@@ -64,8 +87,9 @@ export const emailProcessingService = {
     }
 
     return ServiceResponse.success({
+      forwarded: true as const,
       forwarded_to: FORWARD_TO,
-      intent: result.intent,
+      intent: result.intent.intent,
     });
   },
 };

@@ -43,12 +43,16 @@ async function handleMessage(msg: GraphMessage): Promise<void> {
     body: extractPlainBody(msg),
   });
 
-  if (error) {
-    console.error(`[poller] Pipeline failed: ${error.message}`);
+  if (error || !result) {
+    console.error(`[poller] Pipeline failed: ${error?.message}`);
     return;
   }
 
-  console.log(`[poller] Forwarded to ${result?.forwarded_to}`);
+  if (result.forwarded) {
+    console.log(`[poller] Forwarded to ${result.forwarded_to}`);
+  } else {
+    console.log(`[poller] Skipped (${result.reason})`);
+  }
 
   const { error: readErr } = await emailService.markAsRead(msg.id);
   if (readErr) {
