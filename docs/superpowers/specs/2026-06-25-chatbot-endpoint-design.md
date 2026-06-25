@@ -1,126 +1,158 @@
 # Chatbot Endpoint Design
 
 **Date:** 2026-06-25
-**Status:** Approved (design)
+**Status:** Approved (reconciled design)
 
 ## Goal
 
-Add an HTTP chatbot endpoint to the hackathon-auto-responder that mirrors the
-existing email processing flow. It accepts a multi-turn conversation and returns
-the agent's reply plus structured metadata, reusing the existing OpenAI intent
-agent and its mock tools (invoices, seats).
+Restructure the already-built client chat endpoint so it follows the house
+layering of the email flow, while keeping the real CSV-backed client dataset it
+was built on. The endpoint accepts a multi-turn conversation for a known client
+and returns the agent's reply plus structured metadata.
+
+## Context
+
+A working chatbot already exists (ported from a "3am-client-assistant" Express
+server): `client_data.ts` (CSV loader), `client_assistant.ts` (read-only
+lookups + deterministic keyword fallback), `client_chat_agent.ts` (OpenAI
+tool-calling agent with 3 zero-arg tools), `controllers/chat.ts`, `routes/chat.ts`,
+and an `app.ts` mount. This design refactors that code toward the email flow's
+conventions rather than replacing it.
 
 ## Decisions
 
+- **Data source:** Keep the real CSV dataset (`client_data.ts`) and the
+  `clientId`-based identity. Tools remain zero-arg and look up by the bound
+  `clientId`.
 - **Conversation model:** Multi-turn with client-supplied history. The client
-  sends the full `messages` array on every request; the server is stateless
-  (no DB, no sessions).
+  sends `clientId` plus the full `messages` array each request; the server is
+  stateless.
+- **Agent reuse:** Extract a generic tool-calling loop shared by the email and
+  client agents. Each agent supplies its own tools + structured-output schema.
 - **Response:** The assistant `reply` plus structured metadata (`intent`,
-  `confidence`, `requires_human`, `summary`).
-- **Agent reuse (Approach A):** Extract a shared core from the email agent and
-  add a thin chat agent on top. No duplication; the email path is untouched
-  behaviorally.
+  `confidence`, `requires_human`, `summary`), using a client-domain intent enum
+  (not the 8 email intents).
+- **Fallback:** Keep the deterministic keyword fallback as an internal safety
+  net inside the service (used when no OpenAI key is configured or the agent
+  errors).
 
 ## Architecture
 
-Mirrors the email layering. Request flow:
-
 ```
 POST /api/chat -> chat route -> chat controller -> chat service
-   -> chat agent (runChatAgent) -> shared agent core (runAgentLoop) -> OpenAI + tools
+   -> client chat agent (answerWithAgent) -> shared tool loop -> OpenAI + CSV tools
+                                          \-> keyword fallback (no key / agent error)
 ```
 
 ### 1. Shared agent core — refactor `src/agents/email_intent_agent.ts`
 
-Export reusable pieces so both agents share them:
+Extract the OpenAI tool-calling loop into a generic helper (new module, e.g.
+`src/agents/agent_loop.ts`):
 
-- `TOOLS` and `executeTool` — the invoice + seat tool definitions and dispatch.
-  Unchanged.
-- `runAgentLoop(messages: ChatCompletionMessageParam[]): Promise<EmailIntentResult>`
-  — the existing 5-iteration tool-calling loop (`openai.beta.chat.completions.parse`
-  with `TOOLS` + `EmailIntentResultSchema` response format, tool dispatch, return
-  `msg.parsed`). Extracted verbatim from the current `runEmailIntentAgent` body.
-- `AGENT_WORKFLOW` — a constant string holding the shared intent list and
-  tool-usage rules. Consumed by two thin prompt builders:
-  - `buildEmailSystemPrompt()` — current email wording (reply to client emails,
-    no signature line, etc.).
-  - `buildChatSystemPrompt()` — chat framing ("you are chatting with the client
-    in real time"); same workflow + tool rules; instructs the agent to ask for
-    the client's email if an invoice lookup is needed and none was provided.
+```ts
+runStructuredToolLoop<T>({
+  messages,            // ChatCompletionMessageParam[]
+  tools,               // ChatCompletionTool[]
+  executeTool,         // (name, args) => string (JSON)
+  schema,              // Zod schema for structured output
+  schemaName,          // response_format name
+  maxIterations = 5,
+}): Promise<T>
+```
 
-`runEmailIntentAgent(email)` keeps its exact signature and behavior — it builds
-`[system(email), user(email)]` and calls `runAgentLoop`.
+`runEmailIntentAgent` keeps its exact behavior — it builds its messages and
+calls the shared loop with the email `TOOLS` + `EmailIntentResultSchema`.
 
-### 2. New layers
+### 2. Client chat agent — refactor `src/agents/client_chat_agent.ts`
+
+- Keep the 3 zero-arg CSV tools (`getLatestInvoice`, `getSeats`,
+  `getOpenServiceRequests`) and `runTool(clientId, name)`.
+- Build messages from `[system(client), ...history]`.
+- Call `runStructuredToolLoop` with these tools + the new
+  `ChatResultSchema`, so the agent emits structured output instead of free text.
+- Signature: `answerWithAgent(clientId: string, messages: ChatMessage[]): Promise<ChatResult>`.
+
+### 3. New layers
 
 | Layer | File | Role |
 |-------|------|------|
-| Schema | `src/schemas/chat.ts` | `ChatMessageSchema`, `ChatRequestSchema`, `ChatResponseSchema` + inferred types |
-| Agent | `src/agents/chat_agent.ts` | `runChatAgent(messages, clientEmail?)` — builds `[system(chat), ...history]`, calls `runAgentLoop` |
-| Service | `src/services/chat.ts` | `chatService.processChat(payload)` — returns `ServiceResponse`, maps the structured result to the response shape |
-| Controller | `src/controllers/chat.ts` | `chatController.chat` — `safeParse`, call service, map `error.statusCode`, return JSON |
-| Route | `src/routes/chat.ts` | `POST /` -> `chatController.chat` |
-| App | `src/app.ts` | `api.route('/chat', chatRoutes)` -> `POST /api/chat` |
+| Schema | `src/schemas/chat.ts` | `ChatMessageSchema`, `ChatRequestSchema`, `ChatResultSchema` + inferred types |
+| Service | `src/services/chat.ts` | `chatService.processChat({clientId, messages})` -> `ServiceResponse`; validates client exists, calls agent, falls back to keyword answer on no-key/agent error |
+| Controller | `src/controllers/chat.ts` | `chatController.chat` -> `safeParse`, call service, map `error.statusCode`; keep `health` + `listClients` |
+| Route | `src/routes/chat.ts` | `GET /health`, `GET /clients`, `POST /chat` (unchanged surface) |
+| App | `src/app.ts` | `api.route('/', chatRoutes)` (already wired) |
 
-### 3. Request / response shape
+`client_data.ts` and the lookup functions in `client_assistant.ts`
+(`getClientProfile`, `getLatestInvoice`, `getSeats`, `getOpenServiceRequests`,
+`answerWithFallback`, `routeIntent`) are kept as-is. The agent loop and ad-hoc
+validation move out of the controller into the agent/service layers.
+
+### 4. Request / response shape
 
 ```jsonc
 // POST /api/chat
 {
+  "clientId": "C001",
   "messages": [
-    { "role": "user", "content": "Do you have desks in Makati?" },
-    { "role": "assistant", "content": "Yes, we have..." },
-    { "role": "user", "content": "How much per month?" }
-  ],
-  "client_email": "jane@acme.com"   // optional
+    { "role": "user", "content": "Is my latest invoice paid?" },
+    { "role": "assistant", "content": "..." },
+    { "role": "user", "content": "And how many seats are free?" }
+  ]
 }
 
 // 200 OK
 {
   "reply": "...",
-  "intent": "request_quote",
+  "intent": "seat_availability",
   "confidence": 0.9,
   "requires_human": false,
-  "summary": "..."
+  "summary": "...",
+  "mode": "agent"        // "agent" | "fallback"
 }
 ```
 
 Validation (`ChatRequestSchema`):
 
-- `messages`: array, min length 1. Each item: `{ role: 'user' | 'assistant', content: string (min 1) }`.
-- Last message must have `role: 'user'` (enforced via `.refine()`); otherwise 400.
-- `client_email`: optional `z.string().email()`. When present it is injected so
-  the invoice tool can look up the client; when absent and the user asks about
-  invoices, the agent asks for it (per the chat system prompt).
+- `clientId`: `z.string().min(1)`.
+- `messages`: array, min length 1. Each item `{ role: 'user' | 'assistant', content: z.string().min(1) }`.
+- Last message must be `role: 'user'` (via `.refine()`), else 400.
 
-Response (`ChatResponseSchema`): `reply` is the structured result's
-`suggested_reply`; `intent`, `confidence`, `requires_human`, `summary` come from
-the same `EmailIntentResult`. The email-specific fields (`invoice_numbers`,
-`document_types`, `date_range`) are computed by the agent but omitted from the
-chat response.
+`ChatResultSchema` (structured output + response):
 
-### 4. Error handling
+- `reply`: string.
+- `intent`: enum `['invoice_status', 'seat_availability', 'service_requests', 'general', 'unknown']`.
+- `confidence`: number.
+- `requires_human`: boolean.
+- `summary`: string.
+- `mode` is added by the service (`agent` or `fallback`), not produced by the model.
 
-Identical to the email flow:
+### 5. Error handling
 
-- Service methods return `ServiceResponse.*()` and never throw. OpenAI/tool
-  failures are caught and returned as `internalServerError`; empty/invalid input
-  that slips past validation returns `badRequest`.
+- `chatService` returns `ServiceResponse.*()` and never throws:
+  - unknown `clientId` -> `notFound`.
+  - no OpenAI key OR agent throws -> run keyword fallback, return `success` with
+    `mode: 'fallback'`. The fallback's `routeIntent` value is mapped to the
+    response enum: `invoice -> invoice_status`, `seats -> seat_availability`,
+    `service -> service_requests`, `unknown -> general`. Fallback `confidence`
+    is a fixed low value (e.g. 0.3) and `requires_human` is `false`.
+  - unexpected internal failure -> `internalServerError`.
 - Controller: validation failure -> 400 via `createValidationErrorResponse`;
-  service error -> `c.json({ error }, error.statusCode)`; unexpected throw ->
-  `createErrorResponse` 400.
+  service error -> `c.json({ error }, error.statusCode)`.
 
-### 5. Testing
+### 6. Testing
 
-`src/services/chat.service.test.ts` (Bun test, mock OpenAI — not the DB):
+`src/services/chat.service.test.ts` (Bun test, mock OpenAI, real CSV loader):
 
-- valid multi-turn conversation -> `result` has `reply` + metadata, `error` null.
+- valid multi-turn for a known client -> `result` has `reply` + metadata,
+  `mode: 'agent'`, `error` null.
+- unknown `clientId` -> `notFound`.
+- OpenAI throws / no key -> `success` with `mode: 'fallback'` and a correct
+  keyword answer.
 - empty `messages` -> `badRequest` (defense in depth; controller also validates).
-- OpenAI call throws -> `internalServerError`, `result` null.
 
 ## Out of scope (YAGNI)
 
-- No DB persistence or server-side sessions (stateless multi-turn by choice).
+- No DB persistence or server-side sessions (stateless multi-turn).
 - No streaming responses.
 - No authentication/authorization.
-- No `processed_emails`-style logging of chat turns.
+- No change to the CSV schema, KEY_MAP, or dataset files.
