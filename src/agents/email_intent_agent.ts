@@ -1,11 +1,9 @@
-import { zodResponseFormat } from 'openai/helpers/zod';
 import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from 'openai/resources/chat/completions';
 
-import { getOpenAI } from '@/config/openai';
-import { env } from '@/utils/env';
+import { runStructuredToolLoop, type ToolArgs } from '@/agents/agent_loop';
 import { getInvoicesForClient } from '@/services/mock_invoice_service';
 import { getAvailableSeats } from '@/services/mock_seat_service';
 import {
@@ -72,8 +70,6 @@ const TOOLS: ChatCompletionTool[] = [
   },
 ];
 
-type ToolArgs = Record<string, unknown>;
-
 function executeTool(name: string, args: ToolArgs): string {
   if (name === 'get_invoices_for_client') {
     const invoices = getInvoicesForClient({
@@ -126,8 +122,6 @@ Never invent data. Only use what tools return.`;
 export async function runEmailIntentAgent(
   email: ProcessEmailPayload
 ): Promise<EmailIntentResult> {
-  const openai = getOpenAI();
-
   const userMessage = `From: ${email.from.name} <${email.from.address}>
 Subject: ${email.subject}
 
@@ -138,45 +132,11 @@ ${email.body}`;
     { role: 'user', content: userMessage },
   ];
 
-  const MAX_ITERATIONS = 5;
-
-  for (let i = 0; i < MAX_ITERATIONS; i++) {
-    const completion = await openai.beta.chat.completions.parse({
-      model: env.OPENAI_MODEL,
-      messages,
-      tools: TOOLS,
-      response_format: zodResponseFormat(
-        EmailIntentResultSchema,
-        'email_intent'
-      ),
-    });
-
-    const msg = completion.choices[0]?.message;
-    if (!msg) throw new Error('Agent returned no message');
-
-    if (msg.tool_calls && msg.tool_calls.length > 0) {
-      messages.push(msg);
-      for (const tc of msg.tool_calls) {
-        const args = JSON.parse(tc.function.arguments) as ToolArgs;
-        const result = executeTool(tc.function.name, args);
-        messages.push({
-          role: 'tool',
-          tool_call_id: tc.id,
-          content: result,
-        });
-      }
-      continue;
-    }
-
-    if (msg.parsed) return msg.parsed;
-
-    const refusal = msg.refusal;
-    throw new Error(
-      refusal
-        ? `Agent refused: ${refusal}`
-        : 'Agent returned no tool call and no parsed result'
-    );
-  }
-
-  throw new Error(`Agent exceeded ${MAX_ITERATIONS} iterations`);
+  return runStructuredToolLoop<EmailIntentResult>({
+    messages,
+    tools: TOOLS,
+    executeTool,
+    schema: EmailIntentResultSchema,
+    schemaName: 'email_intent',
+  });
 }
