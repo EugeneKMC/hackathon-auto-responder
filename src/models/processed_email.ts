@@ -10,10 +10,12 @@ import { EmailIntent } from '@/constants/email_intent';
 export const emailIntentEnum = pgEnum('email_intent', [
   EmailIntent.GET_INVOICES,
   EmailIntent.CHECK_INVOICE_STATUS,
-  EmailIntent.CHECK_AVAILABILITY,
-  EmailIntent.REQUEST_QUOTE,
-  EmailIntent.BOOK_TOUR,
-  EmailIntent.REPORT_ISSUE,
+  EmailIntent.SEAT_INQUIRY,
+  EmailIntent.SEAT_CHANGE_REQUEST,
+  EmailIntent.SUBMIT_TICKET,
+  EmailIntent.CHECK_TICKET_STATUS,
+  EmailIntent.CONTRACT_QUERY,
+  EmailIntent.ACCOUNT_SUMMARY,
   EmailIntent.GENERAL_INQUIRY,
   EmailIntent.UNKNOWN,
 ]);
