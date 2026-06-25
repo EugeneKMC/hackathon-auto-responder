@@ -10,7 +10,7 @@ export const HOW_TO_RAISE =
   '(2) a short description, and (3) the priority (Low/Medium/High). ' +
   'Your account manager and the relevant team will be notified automatically.';
 
-export type ChatResult = { reply: string; toolUsed: string };
+export type FallbackResult = { reply: string; toolUsed: string };
 
 export function getClientProfile(data: ClientData, clientId: string): Row | null {
   return data.clients.find((c) => c.clientId === clientId) ?? null;
@@ -79,7 +79,7 @@ export function answerWithFallback(
   data: ClientData,
   clientId: string,
   message: string
-): ChatResult {
+): FallbackResult {
   const client = getClientProfile(data, clientId);
   const name = client ? String(client.companyName) : 'there';
   const intent = routeIntent(message);
