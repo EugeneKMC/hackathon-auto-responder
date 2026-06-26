@@ -55,8 +55,12 @@ function applyCriteria<T>(
     const d = acc.date(it);
     if (c.dateFrom && (!d || d < c.dateFrom)) return false;
     if (c.dateTo && (!d || d > c.dateTo)) return false;
-    if (c.text && !acc.text(it).toLowerCase().includes(c.text.toLowerCase())) {
-      return false;
+    if (c.text) {
+      // Every token must appear (handles multi-word terms like "hardware
+      // connectivity" where the words aren't contiguous in the row).
+      const hay = acc.text(it).toLowerCase();
+      const tokens = c.text.toLowerCase().split(/\s+/).filter(Boolean);
+      if (!tokens.every((tok) => hay.includes(tok))) return false;
     }
     return true;
   });
