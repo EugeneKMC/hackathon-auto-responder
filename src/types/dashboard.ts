@@ -29,6 +29,13 @@ export type Seat = {
   assignedDate: string | null;
 };
 
+// Present on a list response only when OpenAI interpreted a natural-language
+// search query. Omitted entirely for native filtering or no search.
+export type AiSearchMeta = {
+  handledByAi: boolean;
+  interpretation?: string | null;
+};
+
 export type ServiceRequest = {
   id: string;
   reference: string;

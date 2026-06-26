@@ -1,4 +1,5 @@
 import { getSeatAllocationForClient } from '@/repositories/seat';
+import { runSearch } from '@/services/search_filter';
 import { ServiceResponse } from '@/utils/service_response';
 import type { ClientSeat } from '@/models/client_seats';
 import type { Seat, SeatSummary } from '@/types/dashboard';
@@ -37,7 +38,7 @@ export const seatService = {
     return ServiceResponse.success(summary);
   },
 
-  async list(clientId: string, direction: 'asc' | 'desc') {
+  async list(clientId: string, direction: 'asc' | 'desc', search?: string) {
     const agg = await getSeatAllocationForClient({ client_id: clientId });
     const items = agg ? buildSeatList(agg) : [];
     // Default (desc by assignedDate) shows occupied seats first, vacant last.
@@ -48,7 +49,21 @@ export const seatService = {
       return a.seatNumber.localeCompare(b.seatNumber);
     });
     if (direction === 'asc') items.reverse();
-    return ServiceResponse.success(items);
+
+    const { items: filtered, ai } = await runSearch({
+      items,
+      search,
+      resource: 'seats',
+      today: new Date().toISOString().slice(0, 10),
+      allowedStatuses: ['occupied', 'vacant', 'reserved'],
+      accessors: {
+        date: (s) => s.assignedDate,
+        status: (s) => s.status,
+        text: (s) => `${s.seatNumber} ${s.status} ${s.assignedTo ?? ''}`,
+      },
+    });
+
+    return ServiceResponse.success({ items: filtered, ai });
   },
 
   // Synthetic seat id is `${seatRecordId}-${index}`. Parse it, confirm it

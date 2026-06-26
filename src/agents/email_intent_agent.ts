@@ -1,4 +1,3 @@
-import { zodResponseFormat } from 'openai/helpers/zod';
 import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
@@ -263,8 +262,6 @@ Never invent data. Only use what tools return.`;
 export async function runEmailIntentAgent(
   email: ProcessEmailPayload
 ): Promise<EmailIntentResult> {
-  const openai = getOpenAI();
-
   const userMessage = `From: ${email.from.name} <${email.from.address}>
 Subject: ${email.subject}
 

@@ -6,6 +6,7 @@ import {
   updateServiceRequestForClient,
 } from '@/repositories/service_request';
 import { findClient } from '@/repositories/client';
+import { runSearch } from '@/services/search_filter';
 import { ServiceResponse } from '@/utils/service_response';
 import type {
   ClientServiceRequest,
@@ -75,12 +76,29 @@ function mapServiceRequest(t: ClientServiceRequest): ServiceRequest {
 }
 
 export const serviceRequestService = {
-  async list(clientId: string, direction: 'asc' | 'desc') {
+  async list(clientId: string, direction: 'asc' | 'desc', search?: string) {
     // Repository returns rows ordered by submitted_date desc.
     const rows = await getServiceRequestsForClient({ client_id: clientId });
     const items = rows.map(mapServiceRequest);
     if (direction === 'asc') items.reverse();
-    return ServiceResponse.success(items);
+
+    const { items: filtered, ai } = await runSearch({
+      items,
+      search,
+      resource: 'service-requests',
+      today: todayIso(),
+      allowedStatuses: ['open', 'in_progress', 'resolved', 'closed'],
+      allowedPriorities: ['low', 'medium', 'high', 'urgent'],
+      accessors: {
+        date: (t) => t.createdAt,
+        status: (t) => t.status,
+        priority: (t) => t.priority,
+        text: (t) =>
+          `${t.reference} ${t.subject} ${t.category} ${t.priority} ${t.status}`,
+      },
+    });
+
+    return ServiceResponse.success({ items: filtered, ai });
   },
 
   async getById(clientId: string, ticketId: string) {

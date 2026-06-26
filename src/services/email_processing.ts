@@ -11,6 +11,10 @@ import {
 } from '@/constants/email_filter';
 import { env } from '@/utils/env';
 import { ServiceResponse } from '@/utils/service_response';
+import {
+  isAutomatedSender,
+  isForwardableIntent,
+} from '@/constants/email_filter';
 import type { ProcessEmailPayload } from '@/schemas/email_processing';
 
 function parseAllowedEmails(): string[] {
