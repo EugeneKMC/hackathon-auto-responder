@@ -25,6 +25,7 @@ export const ChatResultSchema = z.object({
     'invoice_status',
     'seat_availability',
     'service_requests',
+    'company_info',
     'general',
     'unknown',
   ]),

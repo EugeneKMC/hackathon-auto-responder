@@ -13,7 +13,7 @@ export type ToolArgs = Record<string, unknown>;
 export type RunStructuredToolLoopOptions<T> = {
   messages: ChatCompletionMessageParam[];
   tools: ChatCompletionTool[];
-  executeTool: (name: string, args: ToolArgs) => string;
+  executeTool: (name: string, args: ToolArgs) => string | Promise<string>;
   schema: z.ZodType<T>;
   schemaName: string;
   maxIterations?: number;
@@ -44,7 +44,7 @@ export async function runStructuredToolLoop<T>({
       messages.push(msg);
       for (const tc of msg.tool_calls) {
         const args = JSON.parse(tc.function.arguments) as ToolArgs;
-        const result = executeTool(tc.function.name, args);
+        const result = await executeTool(tc.function.name, args);
         messages.push({ role: 'tool', tool_call_id: tc.id, content: result });
       }
       continue;

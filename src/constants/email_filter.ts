@@ -11,6 +11,14 @@ export const AUTOMATED_SENDER_PATTERNS = [
   'do-not-reply',
   'mailer-daemon',
   'postmaster',
+  'bounce',
+  'newsletter',
+  'notification',
+  'notifications',
+  'marketing@',
+  'alerts@',
+  'alert@',
+  'updates@',
 ] as const;
 
 export function isAutomatedSender(address: string): boolean {

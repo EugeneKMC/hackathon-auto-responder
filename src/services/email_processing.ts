@@ -5,6 +5,10 @@ import { getSeatAllocationForClient } from '@/repositories/seat';
 import { getServiceRequestsForClient } from '@/repositories/service_request';
 import { CLIENTS } from '@/services/mock_data';
 import { renderEmailHtml } from '@/services/email_template';
+import {
+  isAutomatedSender,
+  isForwardableIntent,
+} from '@/constants/email_filter';
 import { env } from '@/utils/env';
 import { ServiceResponse } from '@/utils/service_response';
 import {
@@ -21,8 +25,6 @@ function parseAllowedEmails(): string[] {
 }
 
 const MIN_PLAIN_TEXT_LEN = 30;
-
-// isAutomatedSender now lives in @/constants/email_filter (shared).
 
 function isLowSignalBody(body: string): boolean {
   return body.trim().length < MIN_PLAIN_TEXT_LEN;
@@ -161,21 +163,11 @@ export const emailProcessingService = {
       }
     }
 
+    // Skips automated/no-reply senders and our own mailbox (loop guard).
     if (isAutomatedSender(email.from.address)) {
       return ServiceResponse.success({
         skipped: true,
         reason: 'automated sender',
-      });
-    }
-
-    // Loop guard: only skip when WE are the sender (our own polling mailbox).
-    // User replies to our auto-responder are NOT loops — they're follow-ups.
-    if (
-      email.from.address.toLowerCase() === env.MS_GRAPH_USER_EMAIL.toLowerCase()
-    ) {
-      return ServiceResponse.success({
-        skipped: true,
-        reason: 'self-sent from the polling mailbox (loop guard)',
       });
     }
 
@@ -193,6 +185,15 @@ export const emailProcessingService = {
         error?.message ?? 'Processing returned no result',
         error?.details
       );
+    }
+
+    // Don't reply to mail the agent couldn't classify into a known intent.
+    if (!isForwardableIntent(result.intent.intent)) {
+      return ServiceResponse.success({
+        skipped: true,
+        reason: 'non-forwardable intent (unknown)',
+        intent: result.intent,
+      });
     }
 
     const reply = result.intent.suggested_reply?.trim();

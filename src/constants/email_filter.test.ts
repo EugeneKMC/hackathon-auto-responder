@@ -41,6 +41,6 @@ describe('isForwardableIntent', () => {
   it('accepts actionable intents', () => {
     expect(isForwardableIntent(EmailIntent.GET_INVOICES)).toBe(true);
     expect(isForwardableIntent(EmailIntent.GENERAL_INQUIRY)).toBe(true);
-    expect(isForwardableIntent(EmailIntent.REPORT_ISSUE)).toBe(true);
+    expect(isForwardableIntent(EmailIntent.SUBMIT_TICKET)).toBe(true);
   });
 });
