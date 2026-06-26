@@ -19,9 +19,14 @@ export const env = createEnv({
     MS_GRAPH_CLIENT_SECRET: z.string().min(1).optional(),
     MS_GRAPH_USER_EMAIL: z.string().email(),
 
-    EMAIL_POLL_INTERVAL_MS: z.coerce.number().default(30000),
+    ALLOWED_EMAIL: z.string().optional(),
 
-    DATA_DIR: z.string().optional(),
+    // Mock-auth JWT signing. Defaults are dev-only — override in production.
+    JWT_SECRET: z.string().min(1).default('dev-mock-secret-change-me'),
+    JWT_EXPIRES_IN_SECONDS: z.coerce.number().default(60 * 60 * 24 * 7),
+
+    EMAIL_POLL_INTERVAL_MS: z.coerce.number().default(30000),
+    POLL_LOOKBACK_HOURS: z.coerce.number().default(24),
   },
   runtimeEnv: Bun.env,
   emptyStringAsUndefined: true,
