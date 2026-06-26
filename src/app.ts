@@ -7,6 +7,7 @@ import authRoutes from '@/routes/auth';
 import invoiceRoutes from '@/routes/invoice';
 import seatRoutes from '@/routes/seat';
 import serviceRequestRoutes from '@/routes/service_request';
+import chatRoutes from '@/routes/chat';
 
 const app = new Hono();
 

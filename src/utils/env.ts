@@ -27,6 +27,9 @@ export const env = createEnv({
 
     EMAIL_POLL_INTERVAL_MS: z.coerce.number().default(30000),
     POLL_LOOKBACK_HOURS: z.coerce.number().default(24),
+
+    // Overrides the chatbot's CSV data directory (defaults to ./data).
+    DATA_DIR: z.string().optional(),
   },
   runtimeEnv: Bun.env,
   emptyStringAsUndefined: true,
