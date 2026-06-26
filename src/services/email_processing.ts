@@ -20,29 +20,9 @@ function parseAllowedEmails(): string[] {
     .filter(Boolean);
 }
 
-const AUTOMATED_SENDER_PATTERNS = [
-  'noreply',
-  'no-reply',
-  'donotreply',
-  'do-not-reply',
-  'mailer-daemon',
-  'postmaster',
-  'bounce',
-  'newsletter',
-  'notification',
-  'notifications',
-  'marketing@',
-  'alerts@',
-  'alert@',
-  'updates@',
-];
-
 const MIN_PLAIN_TEXT_LEN = 30;
 
-function isAutomatedSender(address: string): boolean {
-  const lower = address.toLowerCase();
-  return AUTOMATED_SENDER_PATTERNS.some((p) => lower.includes(p));
-}
+// isAutomatedSender now lives in @/constants/email_filter (shared).
 
 function isLowSignalBody(body: string): boolean {
   return body.trim().length < MIN_PLAIN_TEXT_LEN;
