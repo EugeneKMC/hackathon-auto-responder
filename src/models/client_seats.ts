@@ -15,6 +15,7 @@ export const clientSeats = pgTable('seats', {
   seatsAvailable: integer('seats_available').notNull(),
   occupancyPct: integer('occupancy_pct').notNull(),
   floorZone: text('floor_zone').notNull(),
+  location: text('location'),
   dailyRatePhp: numeric('daily_rate_php').notNull(),
   contractStart: date('contract_start', { mode: 'string' }).notNull(),
   contractEnd: date('contract_end', { mode: 'string' }).notNull(),

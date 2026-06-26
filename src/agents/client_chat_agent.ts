@@ -11,6 +11,7 @@ import {
   getOpenServiceRequests,
   loadClientData,
 } from '@/services/client_assistant';
+import { getCompanyLocations } from '@/repositories/seat';
 import {
   ChatResultSchema,
   type ChatResult,
@@ -67,18 +68,35 @@ const TOOLS: ChatCompletionTool[] = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'getCompanyLocations',
+      description:
+        'Company-wide list of office locations and their seat totals. Use for questions about the company itself — "how many locations", "which cities", "where are you located". Not client-specific.',
+      strict: true,
+      parameters: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {},
+        required: [],
+      },
+    },
+  },
 ];
 
 function makeExecuteTool(
   clientId: string
-): (name: string, args: ToolArgs) => string {
+): (name: string, args: ToolArgs) => Promise<string> {
   const data = loadClientData();
-  return (name: string, _args: ToolArgs): string => {
+  return async (name: string, _args: ToolArgs): Promise<string> => {
     if (name === 'getLatestInvoice')
       return JSON.stringify(getLatestInvoice(data, clientId));
     if (name === 'getSeats') return JSON.stringify(getSeats(data, clientId));
     if (name === 'getOpenServiceRequests')
       return JSON.stringify(getOpenServiceRequests(data, clientId));
+    if (name === 'getCompanyLocations')
+      return JSON.stringify(await getCompanyLocations());
     return JSON.stringify({ error: `unknown tool ${name}` });
   };
 }
@@ -93,12 +111,14 @@ export async function answerWithAgent(
   const system =
     `You are the client assistant for a workspace & outsourcing provider. ` +
     `You are talking to ${client ? client.companyName : 'a client'} (client_id ${clientId}). ` +
-    `You can answer ONLY three topics: latest invoice status, seat availability, and open service requests. ` +
-    `ALWAYS call a tool to get real data before answering — never invent numbers. ` +
+    `You help with this client's account — latest invoice status, seat availability, and open service requests — ` +
+    `AND general questions about the company itself, such as our office locations / which cities we operate in. ` +
+    `ALWAYS call the relevant tool to get real data before answering — never invent numbers or place names. ` +
+    `Use getCompanyLocations for company-wide location questions (it is not client-specific). ` +
     `If a tool returns null or an empty list, say so plainly. Keep answers concise and friendly. ` +
     `Amounts are in Philippine pesos (₱). ` +
     `Classify the conversation intent as one of: invoice_status, seat_availability, ` +
-    `service_requests, general, unknown. Put your answer to the client in "reply".`;
+    `service_requests, company_info, general, unknown. Put your answer to the client in "reply".`;
 
   const messages: ChatCompletionMessageParam[] = [
     { role: 'system', content: system },
