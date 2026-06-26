@@ -60,8 +60,8 @@ async function handleMessage(msg: GraphMessage): Promise<void> {
     { replyToMessageId: msg.id }
   );
 
-  if (error) {
-    console.error(`[poller] Pipeline failed: ${error.message}`);
+  if (error || !result) {
+    console.error(`[poller] Pipeline failed: ${error?.message}`);
     return;
   }
 

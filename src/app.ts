@@ -23,6 +23,8 @@ api.route('/seats', seatRoutes);
 api.route('/service-requests', serviceRequestRoutes);
 api.route('/emails', emailRoutes);
 api.route('/process', processRoutes);
+// 3am-client-assistant web chat: /api/health, /api/clients, /api/chat
+api.route('/', chatRoutes);
 
 app.route('/api', api);
 

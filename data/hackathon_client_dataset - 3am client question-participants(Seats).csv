@@ -1,0 +1,12 @@
+SEATS,,,,,,,,,,,,
+"Contracted workspace per client — seats, occupancy, floor zone, daily rate",,,,,,,,,,,,
+,,,,,,,,,,,,
+Seat Record Id,Client Id,Company Name,Total Seats,Seats Occupied,Seats Available,Occupancy Pct,Floor Zone,Daily Rate Php,Contract Start,Contract End,Next Review Date,Notes
+SEAT-CLT-001,CLT-001,Nexus Logistics,10,5,5,50%,Floor 3 – Zone B,3500,2025-10-18,2026-11-20,2026-08-06,On track — no issues
+SEAT-CLT-002,CLT-002,BrightPath BPO,40,40,0,100%,Floor 4 – Zone B,16000,2024-12-10,2027-05-07,2026-07-30,New hires onboarding next month
+SEAT-CLT-003,CLT-003,Horizon Retail,20,10,10,50%,Floor 4 – Zone B,9000,2024-11-11,2026-10-21,2026-07-19,On track — no issues
+SEAT-CLT-004,CLT-004,AquaCore Systems,15,12,3,80%,Floor 4 – Zone B,5250,2025-10-13,2026-09-17,2026-07-24,Requested floor change under review
+SEAT-CLT-005,CLT-005,SkyBridge Finance,30,23,7,77%,Floor 4 – Zone B,10500,2024-10-17,2026-08-23,2026-08-30,Contract renewal discussion due soon
+SEAT-CLT-006,CLT-006,Pinnacle Pharma,10,9,1,90%,Floor 5 – Zone A,4000,2025-07-07,2027-02-02,2026-08-16,Client expanding team next quarter
+SEAT-CLT-007,CLT-007,Coastal Shipping,10,10,0,100%,Floor 3 – Zone A,4000,2025-08-10,2026-12-27,2026-08-26,Client expanding team next quarter
+SEAT-CLT-008,CLT-008,UrbanEdge Property,25,16,9,64%,Floor 3 – Zone B,11250,2025-04-16,2027-02-03,2026-07-24,On track — no issues
