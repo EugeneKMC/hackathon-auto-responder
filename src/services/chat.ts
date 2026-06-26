@@ -20,9 +20,13 @@ export const chatService = {
     const { clientId, messages } = payload;
     try {
       const data = loadClientData();
-      if (!getClientProfile(data, clientId)) {
-        return ServiceResponse.notFound('Unknown clientId');
+      const client = getClientProfile(data, clientId);
+      if (!client) {
+        return ServiceResponse.notFound('Unknown client (id or company name)');
       }
+      // Resolve to the canonical client_id so downstream lookups match even
+      // when the caller passed a company name (e.g. "Pinnacle Pharma").
+      const resolvedId = String(client.clientId);
 
       const lastUser = [...messages].reverse().find((m) => m.role === 'user');
       if (!lastUser) {
@@ -33,7 +37,7 @@ export const chatService = {
 
       // Try the live agent first; fall back on missing key or agent error.
       try {
-        const result = await answerWithAgent(clientId, messages);
+        const result = await answerWithAgent(resolvedId, messages);
         return ServiceResponse.success<ChatResponse>({
           ...result,
           mode: 'agent',
@@ -46,7 +50,7 @@ export const chatService = {
         // fall through to deterministic fallback below
       }
 
-      const fb = answerWithFallback(data, clientId, lastUser.content);
+      const fb = answerWithFallback(data, resolvedId, lastUser.content);
       const intent =
         FALLBACK_INTENT_MAP[routeIntent(lastUser.content)] ?? 'general';
       return ServiceResponse.success<ChatResponse>({

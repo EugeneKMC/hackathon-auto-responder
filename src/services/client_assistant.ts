@@ -1,4 +1,8 @@
-import { loadClientData, type ClientData, type Row } from '@/config/client_data';
+import {
+  loadClientData,
+  type ClientData,
+  type Row,
+} from '@/config/client_data';
 
 // Ported from the 3am-client-assistant Express server (tools.js + fallback.js).
 // Read-only lookups over the client dataset plus a deterministic keyword
@@ -12,8 +16,19 @@ export const HOW_TO_RAISE =
 
 export type FallbackResult = { reply: string; toolUsed: string };
 
-export function getClientProfile(data: ClientData, clientId: string): Row | null {
-  return data.clients.find((c) => c.clientId === clientId) ?? null;
+// Accepts either a client_id (e.g. "CLT-001") or a company name
+// (e.g. "Pinnacle Pharma"), case-insensitively — assistants usually only
+// know the company name from the conversation, not the internal ID.
+export function getClientProfile(
+  data: ClientData,
+  idOrName: string
+): Row | null {
+  const needle = idOrName.trim().toLowerCase();
+  return (
+    data.clients.find((c) => String(c.clientId).toLowerCase() === needle) ??
+    data.clients.find((c) => String(c.companyName).toLowerCase() === needle) ??
+    null
+  );
 }
 
 export function getLatestInvoice(data: ClientData, clientId: string) {
