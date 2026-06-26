@@ -1,4 +1,5 @@
 // Response envelopes expected by the dashboard frontend.
+import type { AiSearchMeta } from '@/types/dashboard';
 
 export type BaseResponse<T> = {
   data: T;
@@ -14,6 +15,7 @@ export type Paginated<T> = {
   pageNumber: number;
   totalCount: number;
   totalPages: number;
+  ai?: AiSearchMeta;
 };
 
 export function baseOk<T>(data: T, message = 'OK'): BaseResponse<T> {
@@ -26,24 +28,25 @@ export function paginate<T>(
   items: T[],
   pageNumber: number,
   pageSize: number,
-  message = 'OK'
+  message = 'OK',
+  ai?: AiSearchMeta
 ): BaseResponse<Paginated<T>> {
   const totalCount = items.length;
   const totalPages = Math.ceil(totalCount / pageSize);
   const start = (pageNumber - 1) * pageSize;
   const pageItems = items.slice(start, start + pageSize);
 
-  return baseOk(
-    {
-      items: pageItems,
-      hasNextPage: pageNumber < totalPages,
-      hasPreviousPage: pageNumber > 1 && totalCount > 0,
-      pageNumber,
-      totalCount,
-      totalPages,
-    },
-    message
-  );
+  const data: Paginated<T> = {
+    items: pageItems,
+    hasNextPage: pageNumber < totalPages,
+    hasPreviousPage: pageNumber > 1 && totalCount > 0,
+    pageNumber,
+    totalCount,
+    totalPages,
+  };
+  if (ai) data.ai = ai;
+
+  return baseOk(data, message);
 }
 
 // sort param is "field:direction" (e.g. "createdAt:desc"). We only sort by

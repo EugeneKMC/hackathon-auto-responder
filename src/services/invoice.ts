@@ -2,6 +2,7 @@ import {
   getInvoiceByIdForClient,
   getInvoicesForClient,
 } from '@/repositories/invoice';
+import { runSearch } from '@/services/search_filter';
 import { ServiceResponse } from '@/utils/service_response';
 import type { ClientInvoice } from '@/models/client_invoices';
 import type { Invoice, InvoicePreview } from '@/types/dashboard';
@@ -54,11 +55,25 @@ export const invoiceService = {
 
   // Full list mapped to the contract shape; controller handles paging.
   // direction sorts by issue date.
-  async list(clientId: string, direction: 'asc' | 'desc') {
+  async list(clientId: string, direction: 'asc' | 'desc', search?: string) {
     const rows = await getInvoicesForClient({ client_id: clientId });
     const items = rows.map(mapInvoice); // desc by issue date from repo
     if (direction === 'asc') items.reverse();
-    return ServiceResponse.success(items);
+
+    const { items: filtered, ai } = await runSearch({
+      items,
+      search,
+      resource: 'invoices',
+      today: todayIso(),
+      allowedStatuses: ['paid', 'pending', 'overdue'],
+      accessors: {
+        date: (i) => i.issuedDate,
+        status: (i) => i.status,
+        text: (i) => `${i.invoiceNumber} ${i.status} ${i.currency} ${i.amount}`,
+      },
+    });
+
+    return ServiceResponse.success({ items: filtered, ai });
   },
 
   async getById(clientId: string, invoiceId: string) {

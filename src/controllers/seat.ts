@@ -30,11 +30,17 @@ export const seatController = {
           400
         );
       }
-      const { pageNumber, pageSize, sort } = parsed.data;
+      const { pageNumber, pageSize, sort, search } = parsed.data;
       const direction = parseSortDirection(sort, 'desc');
-      const { result, error } = await seatService.list(client_id, direction);
+      const { result, error } = await seatService.list(
+        client_id,
+        direction,
+        search
+      );
       if (error) return c.json({ error }, error.statusCode as 500);
-      return c.json(paginate(result ?? [], pageNumber, pageSize));
+      return c.json(
+        paginate(result?.items ?? [], pageNumber, pageSize, 'OK', result?.ai)
+      );
     } catch (err) {
       return c.json({ error: createErrorResponse(err) }, 400);
     }

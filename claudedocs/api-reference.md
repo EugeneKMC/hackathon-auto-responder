@@ -37,8 +37,54 @@ type PaginatedResponse<T> = {
 ### List query params
 
 `pageNumber` (1-based, default 1) · `pageSize` (default 10) · `sort`
-(`"field:direction"`, e.g. `createdAt:desc`). Sort is date-based per resource;
-default is date-descending.
+(`"field:direction"`, e.g. `createdAt:desc`) · `search` (optional free text).
+Sort is date-based per resource; default is date-descending.
+
+### Search & AI fallback (all three list endpoints)
+
+`GET /invoices`, `GET /seats`, and `GET /service-requests` accept an optional
+`search` query param (send it only when the user types something).
+
+Backend behavior:
+1. **Native first** — simple queries are filtered without the LLM: a recognized
+   status keyword (`paid`/`pending`/`overdue`, `open`/`in_progress`/`resolved`,
+   `occupied`/`vacant`), a priority word (service requests), or any single
+   token (matched as a substring against ids/numbers/names/subjects).
+2. **AI fallback** — if the query is natural language (e.g. *"pending invoices
+   for the months of March to June"*), it's sent to OpenAI to produce a
+   structured filter (status / priority / date range / keyword), which is then
+   applied.
+3. Either way the response uses the **same `PaginatedResponse` envelope**. AI
+   only adds a `data.ai` object; it never changes the shape.
+
+`data.ai` (present **only** when AI interpreted the query):
+```ts
+type AiSearchMeta = {
+  handledByAi: boolean;            // true when OpenAI interpreted the query
+  interpretation?: string | null; // short summary, e.g. "Pending invoices issued Mar–Jun 2026"
+};
+```
+Omitted entirely for native filtering or no `search`. One synchronous round
+trip — the endpoint returns final paged results + `ai` in a single response.
+
+```
+GET /invoices?pageNumber=1&pageSize=15&search=pending%20invoices%20for%20March%20to%20June
+```
+```json
+{
+  "data": {
+    "items": [ /* ...filtered invoices... */ ],
+    "hasNextPage": false, "hasPreviousPage": false,
+    "pageNumber": 1, "totalCount": 4, "totalPages": 1,
+    "ai": { "handledByAi": true, "interpretation": "Pending invoices issued Mar–Jun 2026" }
+  },
+  "errors": [], "message": "OK", "success": true
+}
+```
+
+> Requires `OPENAI_API_KEY` on the server. Without it (or on an API error), the
+> AI step is skipped and the query degrades to a best-effort substring match
+> with **no** `data.ai`.
 
 ### Errors
 
