@@ -1,3 +1,4 @@
+import { zodResponseFormat } from 'openai/helpers/zod';
 import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
@@ -273,6 +274,8 @@ ${email.body}`;
   ];
 
   const MAX_ITERATIONS = 6;
+
+  const openai = getOpenAI();
 
   for (let i = 0; i < MAX_ITERATIONS; i++) {
     const completion = await openai.beta.chat.completions.parse({
